@@ -1,33 +1,22 @@
-# multi-stage Dockerfile: build with Maven, run with JRE
-# (Includes a temporary debug step to show the produced jar in build logs)
-
-# Stage 1: build the jar
-FROM maven:3.9.4-eclipse-temurin-17 AS build
+# Use Maven to build the application
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
 
-# Cache dependencies by copying pom first
-COPY pom.xml .
-COPY .mvn .mvn
-COPY mvnw .
-RUN chmod +x mvnw || true
-RUN mvn -B -ntp dependency:go-offline
-
-# Copy full source and build jar
+# Copy everything
 COPY . .
-RUN mvn -B -ntp -DskipTests clean package
 
-# --- DEBUG STEP: list contents of target to show the jar name in logs ---
-# Remove this RUN line once build is confirmed successful to keep image clean.
-RUN ls -la /app/target || true
+# Package the Spring Boot application (skip tests)
+RUN mvn -B -DskipTests clean package
 
-# Stage 2: runtime image
+# Use lightweight JDK image for running the app
 FROM eclipse-temurin:17-jdk-alpine
 WORKDIR /app
 
-# Copy the jar produced in stage 1 into the WORKDIR as app.jar (glob handles different names)
+# Copy the built JAR from the previous stage
 COPY --from=build /app/target/*.jar app.jar
 
+# Expose port 8080 for Render
 EXPOSE 8080
 
-# Run the jar using relative path (inside WORKDIR)
-ENTRYPOINT ["java","-jar","app.jar"]
+# Run the app
+ENTRYPOINT ["java", "-jar", "app.jar"]
