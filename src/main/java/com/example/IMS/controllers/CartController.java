@@ -81,11 +81,15 @@ public class CartController {
         List<Cart> cartItems = cartRepository.findByUserId(userId);
 
         double total = 0;
-        for (Cart item : cartItems) {
-            if (item.getProduct() != null && item.getProduct().getPrice() != null) {
-                total += item.getProduct().getPrice();
-            }
-        }
+        
+         for (Cart item : cartItems) {
+             try {
+                 if (item.getProduct() != null && item.getProduct().getPrice() != null) {
+                     total += item.getProduct().getPrice();
+                 }
+             } catch (Exception ignored) {}
+         }
+
         model.addAttribute("cartItems", cartItems);
         model.addAttribute("userId", userId); // so we can preserve user identity
         model.addAttribute("total", total); // add total to model

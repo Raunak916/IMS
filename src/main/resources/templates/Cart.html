@@ -516,13 +516,14 @@
                     <tbody>
                         <tr th:each="item : ${cartItems}">
                             <td>
-                                <div class="product-name" th:text="${item.product.productName}">Sample Product</div>
+                                <div class="product-name" 
+                                th:text="${item.product != null ? item.product.productName : 'Unknown Product'}">Sample Product</div>
                             </td>
                             <td>
-                                <span class="product-category" th:text="${item.product.category}">Electronics</span>
+                                <span class="product-category" th:text="${item.product != null ? item.product.category : 'Unknown Category'}">Electronics</span>
                             </td>
                             <td>
-                                <span class="product-price">₹<span th:text="${item.product.price}">999</span></span>
+                                <span class="product-price">₹<span th:text="${item.product != null ? item.product.price : 0}">999</span></span>
                             </td>
                             <td>
                                 <form th:action="@{'/cart/remove/' + ${item.id}}" method="post" 
